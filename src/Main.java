@@ -29,7 +29,7 @@ public class Main extends Application {
 	Shader shader;
 	Camera camera;
 	long window;
-	
+
 	World world;
 
 	@Override
@@ -46,7 +46,7 @@ public class Main extends Application {
 		}
 
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_FALSE);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 		glfwWindowHint(GLFW_SAMPLES, 16);
@@ -111,7 +111,7 @@ public class Main extends Application {
 		shader.init_uniforms(List.of("projection", "view", "transform"));
 
 		camera = new Camera();
-		
+
 		world = new World();
 
 		super.preRun();
@@ -120,7 +120,9 @@ public class Main extends Application {
 	@Override
 	public void process() {
 		ImGui.text("Hello, World!");
-
+		if(ImGui.checkbox("Centered view", camera.isFreeCam())){
+			camera.setFreeCam(!camera.isFreeCam());
+		};
 
 		int width[] = new int[1];
 		int height[] = new int[1];

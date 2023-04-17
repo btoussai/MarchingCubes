@@ -19,7 +19,7 @@ public class Camera {
 
 	float d = 3.0f;
 	float theta = 0.0f;
-	float phi = 0.0f;
+	float phi = 1.0f;
 	float scroll;
 
 	Matrix4f viewMat = new Matrix4f();
@@ -171,5 +171,13 @@ public class Camera {
 
 	public Vector2fc getMouseNDC() {
 		return mouseNDC;
+	}
+
+	public boolean isFreeCam() {
+		return freeCam;
+	}
+
+	public void setFreeCam(boolean freeCam) {
+		this.freeCam = freeCam;
 	}
 }
