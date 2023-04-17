@@ -1,7 +1,7 @@
 #version 460
-#extension GL_KHR_shader_subgroup_arithmetic : enable
-#extension GL_KHR_shader_subgroup_basic : enable
-#extension GL_KHR_shader_subgroup_ballot : enable
+//#extension GL_KHR_shader_subgroup_arithmetic : enable
+//#extension GL_KHR_shader_subgroup_basic : enable
+//#extension GL_KHR_shader_subgroup_ballot : enable
 
 layout(local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
 
@@ -24,6 +24,9 @@ layout(std430, binding = 2) restrict readonly buffer LUT
 uniform float SDF_OFFSET;
 uniform mat4 transform;
 uniform vec3 chunk;
+
+shared int shared_array[64];
+shared int shared_globalOffset;
 
 float progression(vec4 sdf_color1, vec4 sdf_color2, out vec3 color){// returns value in [-1, 1]
 	float d = (sdf_color1.x + sdf_color2.x) / (sdf_color1.x - sdf_color2.x);
@@ -97,45 +100,6 @@ vec3 makeVertex(int edge, in vec4 sdf_color[8], out vec3 color) {
 	return vec3(0.0f);
 }
 
-shared int GroupVertexCount;
-shared int GlobalVertexOffset;
-shared int partial_sums_int[gl_NumSubgroups];
-
-int groupExclusiveAdd(int v){
-
-	int w = subgroupExclusiveAdd(v);
-	if(gl_SubgroupInvocationID == gl_SubgroupSize-1){
-		partial_sums_int[gl_SubgroupID] = w + v; //write the subgroup total
-	}
-
-	memoryBarrierShared();
-	barrier();
-
-	if(gl_SubgroupID == 0){
-		int v2 = gl_SubgroupInvocationID < gl_NumSubgroups ? partial_sums_int[gl_SubgroupInvocationID] : int(0);
-		int w2 = subgroupExclusiveAdd(v2);
-
-		///////////////////////////  Custom behavior for the overall sums
-		if(gl_SubgroupInvocationID == gl_SubgroupSize-1){
-			int total = w2 + v2;
-			if(total > 0){
-				GlobalVertexOffset = int(atomicAdd(GlobalVertexCounter, total));
-			}else{
-				GlobalVertexOffset = 0;
-			}
-			GroupVertexCount = total;
-		}
-		/////////////////////////////
-
-		partial_sums_int[gl_SubgroupInvocationID] = w2;
-	}
-
-	memoryBarrierShared();
-	barrier();
-
-	return w + partial_sums_int[gl_SubgroupID];
-}
-
 void main(void){
 	const ivec3 cornerLocs[8] = {
 		ivec3(0,0,0),
@@ -153,25 +117,45 @@ void main(void){
 	bool undefinedValues = false;
 	for(int i=0; i<8; i++){
 		const ivec3 c = ivec3(gl_GlobalInvocationID) + cornerLocs[i];
-		vec4 value = vec4(+1.0f / 0.0f, 0, 0, 0);
+		vec4 value = vec4(0, 0, 0, 0);
 		if (all(lessThan(c, imageSize(Volume)))) {
 			value = imageLoad(Volume, c);
 			value.x += SDF_OFFSET;
+		}else{
+			undefinedValues = true;
 		}
 		
 		values[i] = value;
 		voxelCase |= (value.x > 0.0f ? 1<<i : 0);
-		undefinedValues = undefinedValues || isinf(value.x) || isnan(value.x);
 	}
 
 	int triangles = undefinedValues ? 0 : facesLUT[voxelCase * 16 + 0];// # of triangles to generate
 	
-	int offset = subgroupExclusiveAdd(triangles*3);
-	int globalOffset = 0;
-	if(gl_SubgroupInvocationID == 31){
-		globalOffset = atomicAdd(GlobalVertexCounter, offset + triangles*3);
+	shared_array[gl_LocalInvocationIndex] = triangles * 3;
+	
+	memoryBarrier();
+	barrier();
+	
+	int offset = 0;
+	for(int i=0; i<gl_LocalInvocationIndex; i++){
+		offset += shared_array[i];
 	}
-	offset += subgroupBroadcast(globalOffset, 31);
+	
+	if(gl_LocalInvocationIndex == 63){
+		shared_globalOffset = atomicAdd(GlobalVertexCounter, offset + triangles*3);
+	}
+	
+	memoryBarrier();
+	barrier();
+	
+	offset += shared_globalOffset;
+	
+	//int offset = subgroupExclusiveAdd(triangles*3);
+	//int globalOffset = 0;
+	//if(gl_SubgroupInvocationID == 31){
+	//	globalOffset = atomicAdd(GlobalVertexCounter, offset + triangles*3);
+	//}
+	//offset += subgroupBroadcast(globalOffset, 31);
 	
 	for(int k=0; k<triangles; k++){
 
