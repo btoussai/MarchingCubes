@@ -2,7 +2,7 @@
 
 layout(local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
 
-uniform layout(binding=0, rgba16f) writeonly restrict image3D Volume;
+uniform layout(binding=0, rgba16_snorm) writeonly restrict image3D Volume;
 uniform layout(binding=1) sampler3D NoiseTex;
 
 uniform vec3 chunk;
@@ -66,7 +66,7 @@ void main(){
 	vec4 value = vec4(position.y * 2.0f - 1.0f, 0, 0, 0);
 	
 	for(int i=0; i<5; i++){
-		value += sampleOctave(position, baseFrequency * pow(1.97f, i), baseAmplitude / pow(1.57f, i));
+		value += sampleOctave(position, baseFrequency * pow(2.0f, i), baseAmplitude / pow(2.0f, i));
 	}
 	
 	value.yzw = abs(cos(value.yzw));

@@ -5,10 +5,12 @@
 
 layout(local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
 
-uniform layout(binding=0, rgba16f) readonly restrict image3D Volume;
+uniform layout(binding=0, rgba16_snorm) readonly restrict image3D Volume;
 
 layout(binding = 0, std430) restrict buffer AtomicsBlock{
 	int GlobalVertexCounter;
+	int emptyVoxels;
+	int filledVoxels;
 };
 
 layout(binding = 1, std430) restrict writeonly buffer VertexBlock{
@@ -26,6 +28,8 @@ uniform mat4 transform;
 uniform vec3 chunk;
 
 shared int shared_array[64];
+shared int shared_emptyVoxels[64];
+shared int shared_filledVoxels[64];
 shared int shared_globalOffset;
 
 float progression(vec4 sdf_color1, vec4 sdf_color2, out vec3 color){// returns value in [-1, 1]
@@ -132,17 +136,25 @@ void main(void){
 	int triangles = undefinedValues ? 0 : facesLUT[voxelCase * 16 + 0];// # of triangles to generate
 	
 	shared_array[gl_LocalInvocationIndex] = triangles * 3;
+	shared_emptyVoxels[gl_LocalInvocationIndex] = voxelCase==0 ? 1 : 0;
+	shared_filledVoxels[gl_LocalInvocationIndex] = voxelCase==255 ? 1 : 0;
 	
 	memoryBarrier();
 	barrier();
 	
 	int offset = 0;
+	int localEmptyVoxels = 0;
+	int localFilledVoxels = 0;
 	for(int i=0; i<gl_LocalInvocationIndex; i++){
 		offset += shared_array[i];
+		localEmptyVoxels += shared_emptyVoxels[i];
+		localFilledVoxels += shared_filledVoxels[i];
 	}
 	
 	if(gl_LocalInvocationIndex == 63){
 		shared_globalOffset = atomicAdd(GlobalVertexCounter, offset + triangles*3);
+		atomicAdd(emptyVoxels, localEmptyVoxels);
+		atomicAdd(filledVoxels, localFilledVoxels);
 	}
 	
 	memoryBarrier();
