@@ -146,7 +146,7 @@ public class Main extends Application {
 //		shader.stop();
 //		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-		world.render(camera.getProjectionMatrix(), camera.getViewMatrix(), camera.getCameraPos());
+		world.render(camera);
 
 	}
 

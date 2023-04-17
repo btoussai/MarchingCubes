@@ -28,6 +28,7 @@ public class Camera {
 	Vector3f camPos = new Vector3f();
 	Vector3f camDir = new Vector3f();
 	Vector2f mousePrev = new Vector2f();
+	Vector2f mouseScreen = new Vector2f();
 	Vector2f mouseNDC = new Vector2f();
 	boolean freeCam = true;
 	long window = glfwGetCurrentContext();
@@ -83,12 +84,12 @@ public class Camera {
 
 	public void updateView(float width, float height) {
 		
-		Vector2f mousePos = mousePos();
-		mouseNDC.set(2.0f * mousePos.x / width - 1.0f, 1.0f - 2.0f * mousePos.y / height);
-		float dx = mousePrev.x - mousePos.x;
-		float dy = mousePrev.y - mousePos.y;
+		mouseScreen = mousePos();
+		mouseNDC.set(2.0f * mouseScreen.x() / width - 1.0f, 1.0f - 2.0f * mouseScreen.y() / height);
+		float dx = mousePrev.x - mouseScreen.x();
+		float dy = mousePrev.y - mouseScreen.y();
 
-		mousePrev.set(mousePos);
+		mousePrev.set(mouseScreen);
 		if (lmb()) {
 			theta += dx * 0.005f;
 			phi -= dy * 0.005f;
@@ -179,5 +180,9 @@ public class Camera {
 
 	public void setFreeCam(boolean freeCam) {
 		this.freeCam = freeCam;
+	}
+
+	public Vector2fc getMousePos() {
+		return mouseScreen;
 	}
 }
