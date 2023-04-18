@@ -7,7 +7,7 @@ uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 transform;
 
-out vec3 color;
+flat out vec3 color;
 out vec3 normal;
 out vec3 worldPos;
 

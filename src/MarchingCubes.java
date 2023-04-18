@@ -52,9 +52,9 @@ public class MarchingCubes {
 	Shader generateShader;
 
 	int maxVertices[] = new int[] { 500 };
-	int volumeResolution[] = new int[] { 32 };
-	float baseFrequency[] = new float[] { 0.01f };
-	float baseAmplitude[] = new float[] { 0.5f };
+	int volumeResolution[] = new int[] { 16 };
+	float baseFrequency[] = new float[] { 0.02f };
+	float baseAmplitude[] = new float[] { 3.0f };
 
 	final int vertexSize = 4 * 4;
 

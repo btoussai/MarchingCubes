@@ -48,7 +48,7 @@ vec4 sampleOctave(inout vec3 position, float frequency, float amplitude){
 	
 	vec4 value = cubicLerpNoise(texel) * amplitude;
 	
-	position += vec3(value) + 197.653f * frequency;
+	position += vec3(value) * frequency * 4;
 	
 	return value;
 }

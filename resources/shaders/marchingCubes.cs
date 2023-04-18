@@ -162,13 +162,6 @@ void main(void){
 	
 	offset += shared_globalOffset;
 	
-	//int offset = subgroupExclusiveAdd(triangles*3);
-	//int globalOffset = 0;
-	//if(gl_SubgroupInvocationID == 31){
-	//	globalOffset = atomicAdd(GlobalVertexCounter, offset + triangles*3);
-	//}
-	//offset += subgroupBroadcast(globalOffset, 31);
-	
 	for(int k=0; k<triangles; k++){
 
 		vec3 color;

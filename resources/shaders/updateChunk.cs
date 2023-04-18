@@ -14,7 +14,8 @@ uniform float strength;
 
 void main(void){
 
-	vec3 worldPos = chunkCoord + vec3(gl_GlobalInvocationID) / (imageSize(Volume)-1);
+	vec3 worldPos = chunkCoord +
+		vec3(gl_GlobalInvocationID) / (imageSize(Volume)-1) - 0.5f;
 
 	vec4 v = imageLoad(Volume, ivec3(gl_GlobalInvocationID));
 	

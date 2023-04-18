@@ -60,6 +60,13 @@ public class BindlessBuffer {
 		this.flags = flags;
 	}
 	
+	public void storeData(float[] data, int flags) {
+		reset();
+		glNamedBufferStorage(ID, data, flags);
+		this.size = data.length * 4;
+		this.flags = flags;
+	}
+	
 	public void updateData(ByteBuffer data, long offset) {
 		glNamedBufferSubData(ID, offset, data);
 	}

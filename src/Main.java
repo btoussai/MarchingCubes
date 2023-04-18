@@ -1,12 +1,15 @@
-import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL32;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
+
+import cataclysm.DefaultParameters;
+import cataclysm.PhysicsWorld;
+import cataclysm.wrappers.WrapperBuilder;
+import cataclysm.wrappers.WrapperFactory;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL46C.*;
@@ -31,6 +34,7 @@ public class Main extends Application {
 	long window;
 
 	World world;
+	PhysicsManager physicsManager;
 
 	@Override
 	protected void configure(Configuration config) {
@@ -113,7 +117,8 @@ public class Main extends Application {
 		camera = new Camera();
 
 		world = new World();
-
+		physicsManager = new PhysicsManager();
+		
 		super.preRun();
 	}
 
@@ -123,7 +128,9 @@ public class Main extends Application {
 		if(ImGui.checkbox("Centered view", camera.isFreeCam())){
 			camera.setFreeCam(!camera.isFreeCam());
 		};
-
+		
+		physicsManager.update();
+		
 		int width[] = new int[1];
 		int height[] = new int[1];
 		glfwGetFramebufferSize(window, width, height);
@@ -131,7 +138,7 @@ public class Main extends Application {
 		glViewport(0, 0, width[0], height[0]);
 
 		camera.updateView(width[0], height[0]);
-		world.updateGUI(camera.getCameraPos());
+		world.updateGUI(camera);
 
 //		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 //		shader.start();
@@ -146,11 +153,12 @@ public class Main extends Application {
 //		shader.stop();
 //		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-		world.render(camera.getProjectionMatrix(), camera.getViewMatrix(), camera.getCameraPos());
+		world.render(camera);
 
 	}
 
 	public static void main(String[] args) {
 		launch(new Main());
+		
 	}
 }

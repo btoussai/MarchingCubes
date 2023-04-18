@@ -25,9 +25,11 @@ public class Camera {
 	Matrix4f viewMat = new Matrix4f();
 	Matrix4f invViewMat = new Matrix4f();
 	Matrix4f projMat = new Matrix4f();
+	Matrix4f invProjMat = new Matrix4f();
 	Vector3f camPos = new Vector3f();
 	Vector3f camDir = new Vector3f();
 	Vector2f mousePrev = new Vector2f();
+	Vector2f mouseScreen = new Vector2f();
 	Vector2f mouseNDC = new Vector2f();
 	boolean freeCam = true;
 	long window = glfwGetCurrentContext();
@@ -43,35 +45,39 @@ public class Camera {
 		});
 	}
 
-	private boolean forward() {
+	public boolean forward() {
 		return glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS;
 	}
 
-	private boolean backward() {
+	public boolean backward() {
 		return glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS;
 	}
 
-	private boolean left() {
+	public boolean left() {
 		return glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS;
 	}
 
-	private boolean right() {
+	public boolean right() {
 		return glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS;
 	}
 
-	private boolean up() {
+	public boolean up() {
 		return glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
 	}
 
-	private boolean down() {
+	public boolean down() {
 		return glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
 	};
 
-	private boolean lmb() {
+	public boolean lmb() {
 		return glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS;
 	}
 
-	private float scroll() {
+	public boolean rmb() {
+		return glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS;
+	}
+
+	public float scroll() {
 		return scroll;
 	}
 
@@ -83,12 +89,12 @@ public class Camera {
 
 	public void updateView(float width, float height) {
 		
-		Vector2f mousePos = mousePos();
-		mouseNDC.set(2.0f * mousePos.x / width - 1.0f, 1.0f - 2.0f * mousePos.y / height);
-		float dx = mousePrev.x - mousePos.x;
-		float dy = mousePrev.y - mousePos.y;
+		mouseScreen = mousePos();
+		mouseNDC.set(2.0f * mouseScreen.x() / width - 1.0f, 1.0f - 2.0f * mouseScreen.y() / height);
+		float dx = mousePrev.x - mouseScreen.x();
+		float dy = mousePrev.y - mouseScreen.y();
 
-		mousePrev.set(mousePos);
+		mousePrev.set(mouseScreen);
 		if (lmb()) {
 			theta += dx * 0.005f;
 			phi -= dy * 0.005f;
@@ -132,6 +138,8 @@ public class Camera {
 		camDir.normalize();
 		invViewMat.set((Matrix4fc) viewMat);
 		invViewMat.invert();
+		invProjMat.set(projMat);
+		invProjMat.invert();
 		if (width != 0.0f && height != 0.0f) {
 			if (Float.isFinite(FAR_PLANE)) {
 				projMat.setPerspective(FOV_Y, width / height, NEAR_PLANE, FAR_PLANE);
@@ -160,6 +168,10 @@ public class Camera {
 	public Matrix4fc getInvViewMatrix() {
 		return invViewMat;
 	}
+	
+	public Matrix4fc getInvProjMatrix() {
+		return invProjMat;
+	}
 
 	public Vector3fc getCameraPos() {
 		return camPos;
@@ -179,5 +191,9 @@ public class Camera {
 
 	public void setFreeCam(boolean freeCam) {
 		this.freeCam = freeCam;
+	}
+
+	public Vector2fc getMousePos() {
+		return mouseScreen;
 	}
 }
