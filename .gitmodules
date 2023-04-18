@@ -1,0 +1,3 @@
+[submodule "physicsengine"]
+	path = physicsengine
+	url = https://github.com/btoussai/physicsengine.git
