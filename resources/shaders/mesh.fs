@@ -30,8 +30,7 @@ void main(){
 	out_Color = vec4(color * L, 1);
 	
 	float dist2 = dot(prevCursorWorldPos-worldPos, prevCursorWorldPos-worldPos);
-	if(dist2 < radius*radius){
-		float t = 1.0f - min(dist2 / (radius*radius), 1.0f);
-		out_Color = mix(out_Color, vec4(1.0, 0.0, 0.0, 0.0), t);
+	if(dist2 < radius*radius && dist2 > radius*radius * 0.8f){
+		out_Color = mix(out_Color, vec4(1.0, 0.0, 0.0, 0.0), 0.8f);
 	}
 }

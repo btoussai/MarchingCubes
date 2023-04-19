@@ -47,7 +47,7 @@ public class World {
 
 
 	float updateStrength[] = new float[] { 1.0f };
-	float updateRadius[] = new float[] { 0.5f };
+	float updateRadius[] = new float[] { 0.25f };
 	
 	int totalVertices = 0;
 	Map<Vector3i, Chunk> chunks = new HashMap<>();

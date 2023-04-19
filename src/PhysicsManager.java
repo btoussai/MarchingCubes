@@ -130,6 +130,8 @@ public class PhysicsManager {
 		org.joml.Matrix4f transform = new org.joml.Matrix4f();
 
 		for(var e : dynamicObjects) {
+			e.body.setSleeping(false);
+			e.body.setSleepCounter(0);
 			
 			var R = e.body.getOriginTransform().getRotation();
 			var T = e.body.getOriginTransform().getTranslation();
@@ -149,16 +151,16 @@ public class PhysicsManager {
 			e.vao.unbind();
 		}
 
-		for(var e : collisionMeshes.values()) {
-			loadFromMat4(e.mesh.getTransform(), transform);
-			transform.scaleLocal(1.0f / scale);
-			debugShader.loadMat4("transform", transform);
-			e.vao.bind();
-			e.vao.bindAttribute(0);
-			glDrawElements(GL_TRIANGLES, e.vao.getIndexCount(), GL_UNSIGNED_INT, 0);
-			e.vao.unbindAttribute(0);
-			e.vao.unbind();
-		}
+//		for(var e : collisionMeshes.values()) {
+//			loadFromMat4(e.mesh.getTransform(), transform);
+//			transform.scaleLocal(1.0f / scale);
+//			debugShader.loadMat4("transform", transform);
+//			e.vao.bind();
+//			e.vao.bindAttribute(0);
+//			glDrawElements(GL_TRIANGLES, e.vao.getIndexCount(), GL_UNSIGNED_INT, 0);
+//			e.vao.unbindAttribute(0);
+//			e.vao.unbind();
+//		}
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		
 		debugShader.stop();
@@ -196,13 +198,6 @@ public class PhysicsManager {
 				continue;
 			}
 			
-			float l1 = Vector3f.distanceSquared(v1, v2);
-			float l2 = Vector3f.distanceSquared(v2, v3);
-			float l3 = Vector3f.distanceSquared(v3, v1);
-			float minL = Math.min(Math.min(l1, l2), Math.min(Math.min(l2, l3), Math.min(l1, l3)));
-			if(minL < 1.0E-6f) {
-				continue;
-			}
 			vertices.add(v1);
 			vertices.add(v2);
 			vertices.add(v3);
