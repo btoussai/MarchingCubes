@@ -8,6 +8,8 @@ public class Chunk {
 	int vertices;
 	Vector3i coords;
 	Texture3D voxels;
+	float[] vertices_array;
+	
 	public Chunk(VAO vao, Texture3D voxels, int vertices, Vector3i coords) {
 		this.vao = vao;
 		this.voxels = voxels;

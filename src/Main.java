@@ -116,8 +116,8 @@ public class Main extends Application {
 
 		camera = new Camera();
 
-		world = new World();
 		physicsManager = new PhysicsManager();
+		world = new World(physicsManager);
 		
 		super.preRun();
 	}
@@ -154,6 +154,7 @@ public class Main extends Application {
 //		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		world.render(camera);
+		physicsManager.render(camera);
 
 	}
 

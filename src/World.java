@@ -58,8 +58,12 @@ public class World {
 
 	BindlessBuffer WorldPosBuffer;
 	Vector3f prevCursorWorldPos = new Vector3f();
+	
+	PhysicsManager physicsManager;
 
-	public World() {
+	public World(PhysicsManager physicsManager) {
+		this.physicsManager = physicsManager;
+		
 		meshShader = new Shader("resources/shaders/mesh.vs", "resources/shaders/mesh.gs", "resources/shaders/mesh.fs");
 		meshShader.finishInit();
 		meshShader.init_uniforms(
@@ -118,6 +122,7 @@ public class World {
 			if (chunk.vao != null) {
 				nonEmptyChunks.add(chunk);
 				totalVertices += chunk.vertices;
+				physicsManager.addTriangles(chunk);
 			}
 			return true;
 		}
@@ -216,11 +221,12 @@ public class World {
 		
 		List<Chunk> chunksToUpdate = new ArrayList<>();
 		
+		Vector3f center = prevCursorWorldPos.add(new Vector3f(0.5f), new Vector3f());
 		
-		float r = updateRadius[0]+1;
-		for(int k=(int)Math.floor(prevCursorWorldPos.z - r); k < (int)Math.ceil(prevCursorWorldPos.z + r); k++) {
-			for(int j=(int)Math.floor(prevCursorWorldPos.y - r); j < (int)Math.ceil(prevCursorWorldPos.y + r); j++) {
-				for(int i=(int)Math.floor(prevCursorWorldPos.x - r); i < (int)Math.ceil(prevCursorWorldPos.x + r); i++) {
+		float r = updateRadius[0];
+		for(int k=(int)Math.floor(center.z - r); k < (int)Math.ceil(center.z + r); k++) {
+			for(int j=(int)Math.floor(center.y - r); j < (int)Math.ceil(center.y + r); j++) {
+				for(int i=(int)Math.floor(center.x - r); i < (int)Math.ceil(center.x + r); i++) {
 					Chunk c = chunks.get(new Vector3i(i, j, k));
 					if(c != null) {
 						chunksToUpdate.add(c);
@@ -244,6 +250,7 @@ public class World {
 
 		for(Chunk c : chunksToUpdate) {
 			marchingCubes.extractMesh(c);
+			physicsManager.addTriangles(c);
 			if(c.vertices == 0) {
 				nonEmptyChunks.remove(c);
 			}else {

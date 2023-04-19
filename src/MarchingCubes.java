@@ -22,6 +22,7 @@ import static org.lwjgl.opengl.GL45C.glMapNamedBuffer;
 import static org.lwjgl.opengl.GL45C.glUnmapNamedBuffer;
 
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Arrays;
 import java.util.List;
@@ -206,8 +207,10 @@ public class MarchingCubes {
 		if(chunk.vao != null) {
 			chunk.vao.delete();
 			chunk.vao = null;
+			chunk.vertices_array = null;
 		}
 
+		chunk.vertices = capacity / vertexSize;
 		if (capacity > 0) {
 			chunk.vao = new VAO();
 			chunk.vao.bind();
@@ -219,9 +222,18 @@ public class MarchingCubes {
 			chunk.vao.unbind();
 			chunk.vao.getAttributeVBOs().add(vbo);
 			glCopyNamedBufferSubData(marchingCubesOutput.getID(), vbo.getID(), 0, 0, capacity);
+			
+			FloatBuffer MCOuput = glMapNamedBuffer(marchingCubesOutput.getID(), GL_READ_ONLY).asFloatBuffer();
+			chunk.vertices_array = new float[chunk.vertices * 3];
+			for(int i=0; i<chunk.vertices; i++) {
+				chunk.vertices_array[3*i+0] = MCOuput.get(4*i+0);
+				chunk.vertices_array[3*i+1] = MCOuput.get(4*i+1);
+				chunk.vertices_array[3*i+2] = MCOuput.get(4*i+2);
+			}
+			glUnmapNamedBuffer(marchingCubesOutput.getID());
+			
 		}
 
-		chunk.vertices = capacity / vertexSize;
 	}
 
 }
